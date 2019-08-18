@@ -27,5 +27,6 @@ cabal-dev
 *.chi
 *.chs.h
 .virthualenv
-
+.ghc.environment.x86_64-linux-8.6.4
+dist-newstyle/
 
