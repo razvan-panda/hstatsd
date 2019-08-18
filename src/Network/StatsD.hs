@@ -2,7 +2,7 @@
 module Network.StatsD
     ( StatsD
     , mkStatsD, openStatsD, closeStatsD
-    
+
     , Stat(..), stat
     , push, showStat
     ) where
@@ -32,14 +32,14 @@ openStatsD host port prefix = do
             { addrFamily = AF_INET
             , addrSocketType = Datagram
             }
-    
+
     s <- socket AF_INET Datagram defaultProtocol
-    
+
     addrInfos <- getAddrInfo (Just hints) (Just host) (Just port)
     case addrInfos of
         [] -> fail "Could not resolve host and/or port"
         addrInfo : _ -> connect s (addrAddress addrInfo)
-    
+
     return (mkStatsD s prefix)
 
 data Stat = Stat
@@ -58,7 +58,7 @@ fmt prefix Stat{..} = T.concat $ execWriter $ do
     let colon = T.singleton ':'
         bar = T.singleton '|'
         bar_at = T.pack "|@"
-    
+
     tell [prefix, bucket, colon, val, bar, unit]
     case sample of
         Nothing -> return ()
@@ -70,4 +70,4 @@ fmtMany prefix = map (T.encodeUtf8 . fmt prefix)
 
 push statsd = mapM_ (BL.sendAll (connection statsd)) . segment . fmtMany (prefix statsd)
 
-closeStatsD = sClose . connection
+closeStatsD = close . connection
